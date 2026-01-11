@@ -1,0 +1,35 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '2.2.21'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'sk.ivankohut'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    testImplementation 'org.assertj:assertj-core:3.23.1'
+}
+
+kotlin {
+    jvmToolchain(17)
+}
+
+test {
+    useJUnitPlatform()
+}
+
+shadowJar {
+//    archiveBaseName.set('myapp')  // Or use project.name
+    archiveClassifier.set('')     // Omit classifier for clean name
+    archiveVersion.set('')
+    manifest {
+        attributes 'Main-Class': 'sk.ivankohut.MainKt'
+    }
+    mergeServiceFiles()  // Handles duplicates like Spring Boot
+}
+
