@@ -18,18 +18,19 @@ class HtmlSongTest {
         // verify
         assertThat(sut.toString()).isEqualTo(
             """
-            <!DOCTYPE>
+            <!DOCTYPE html>
             <html lang="sk">
             <head>
               <meta charset="utf-8">
               <title>name</title>
               <style>
-                  p {
-                      margin: 0;
-                  }
-                  .slide {
-                      margin-bottom: 1em;
-                  }
+                p {
+                  margin: 0;
+                }
+
+                .slide {
+                  margin-bottom: 1em;
+                }
               </style>
             </head>
             <body>

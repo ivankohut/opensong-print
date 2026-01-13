@@ -1,14 +1,85 @@
 package sk.ivankohut
 
 import org.w3c.dom.Element
+import java.io.File
+import java.nio.file.Path
+import java.util.Map.entry
 import java.util.function.Function
 import javax.xml.parsers.DocumentBuilderFactory
+import kotlin.io.path.createDirectories
+import kotlin.io.path.writeBytes
 
 fun main(vararg args: String) {
-    print(HtmlSong(args[0], OpenSongSong(OpenSongXmlElementsContents(standardInput()))).toString())
+    FolderOfUtf8Files(
+        Path.of("${args[1]}/html"),
+        HtmlHymnbook(
+            DirFiles(Path.of(args[1]))
+                .filter { it.value.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<song>") },
+            args[0]
+        )
+    ).write()
 }
 
-private fun standardInput(): String = System.`in`.bufferedReader(Charsets.UTF_8).use { it.readText() }
+class DirFiles(private val path: Path) : Iterable<Map.Entry<String, String>> {
+    override fun iterator(): Iterator<Map.Entry<String, String>> {
+        return (File(path.toString()).listFiles() ?: emptyArray())
+            .filter { it.isFile }
+            .map { file -> entry(file.name, file.readText()) }
+            .iterator()
+    }
+}
+
+interface HymnbookSong {
+    val name: String
+    val number: Int
+    val filename: String
+    val content: String
+}
+
+class HtmlHymnbookSong(song: Song, filename: String, content: Any) : HymnbookSong {
+    override val name: String = song.name
+    override val number: Int = song.number
+    override val filename: String = "$filename.html"
+    override val content: String = content.toString()
+}
+
+class HtmlHymnbook(private val name: String, private val htmlSongs: Iterable<HymnbookSong>) :
+    Iterable<Map.Entry<String, String>> {
+    constructor(openSongSongs: Iterable<Map.Entry<String, String>>, name: String)
+            : this(name, openSongSongs.map { entry ->
+        val song = OpenSongSong(OpenSongXmlElementsContents(entry.value))
+        HtmlHymnbookSong(song, entry.key, HtmlSong(name, song))
+    })
+
+    override fun iterator(): Iterator<Map.Entry<String, String>> {
+        val listItems = htmlSongs.sortedBy { it.number }
+            .joinToString("\n") { "  <li><a href=\"${it.filename}\">${it.number} - ${it.name}</a></li>" }
+        return htmlSongs
+            .map { song -> entry(song.filename, song.content) }
+            .plus(
+                entry(
+                    "index.html", """
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <title>Spevník „${name}“</title>
+</head>
+<body>
+
+<h1>Spevník „${name}“</h1>
+<ul>
+${listItems}
+</ul>
+
+</body>
+</html>
+""".trimIndent()
+                )
+            )
+            .iterator()
+    }
+}
 
 class OpenSongXmlElementsContents(xml: String) : Function<String, String> {
     private val root: Element by lazy {
@@ -67,18 +138,19 @@ class HtmlSong(private val hymnbook: String, private val song: Song) {
             }.joinToString("")
         }.joinToString("")
         return """
-<!DOCTYPE>
+<!DOCTYPE html>
 <html lang="sk">
 <head>
   <meta charset="utf-8">
   <title>${song.name}</title>
   <style>
-      p {
-          margin: 0;
-      }
-      .slide {
-          margin-bottom: 1em;
-      }
+    p {
+      margin: 0;
+    }
+
+    .slide {
+      margin-bottom: 1em;
+    }
   </style>
 </head>
 <body>
@@ -89,5 +161,12 @@ ${lyrics}
 </body>
 </html>
 """.trimIndent()
+    }
+}
+
+class FolderOfUtf8Files(private val path: Path, private val files: Iterable<Map.Entry<String, String>>) {
+    fun write() {
+        path.createDirectories()
+        files.forEach { entry -> path.resolve(entry.key).writeBytes(entry.value.toByteArray()) }
     }
 }
