@@ -130,13 +130,14 @@ interface Song {
 
 class HtmlSong(private val hymnbook: String, private val song: Song) {
     override fun toString(): String {
-        val lyrics = song.lyrics.map { section ->
-            "<h2>${section.name}</h2>\n" + section.slides.map { slide ->
-                "<div class=\"slide\">\n" + slide.split(Regex("\\n"))
-                    .map { line -> "  <p>${line}</p>\n" }
-                    .joinToString("") + "</div>\n"
-            }.joinToString("")
-        }.joinToString("")
+        val lyrics = "<table>\n" + song.lyrics.map { section ->
+            "  <tr>\n    <td>\n" + section.slides.map { slide ->
+                "      <div class=\"slide\">\n" + slide.split(Regex("\\n"))
+                    .map { line -> "        <p>${line}</p>\n" }
+                    .joinToString("") + "      </div>\n"
+            }.joinToString("") +
+            "    </td>\n    <td>${section.name}</td>\n  </tr>\n"
+        }.joinToString("") + "</table>"
         return """
 <!DOCTYPE html>
 <html lang="sk">
@@ -144,20 +145,54 @@ class HtmlSong(private val hymnbook: String, private val song: Song) {
   <meta charset="utf-8">
   <title>${song.name}</title>
   <style>
+    html {
+      margin: 20px;
+    }
+
+    #header > * {
+      text-align: right;
+      margin: 0;
+    }
+
     p {
       margin: 0;
     }
 
     .slide {
-      margin-bottom: 1em;
+      margin-bottom: 0.5em;
+    }
+
+    .slide:first-child {
+      margin-top: 0.5em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1em;
+    }
+
+    td {
+      vertical-align: top;
+      border-top: 1px dotted black;
+    }
+
+    td:last-child {
+      font-size: x-large;
+      padding-top: 1em;
+      text-align: center;
     }
   </style>
 </head>
 <body>
 
-<h1>${song.name}</h1>
-<h3>${hymnbook}, č. ${song.number}</h3>
+<div id="header">
+  <h2>č. ${song.number}</h2>
+  <h3>${song.name}</h3>
+  <h4>${hymnbook}</h4>
+</div>
 ${lyrics}
+
 </body>
 </html>
 """.trimIndent()

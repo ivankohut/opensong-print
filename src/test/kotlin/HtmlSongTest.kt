@@ -24,28 +24,67 @@ class HtmlSongTest {
               <meta charset="utf-8">
               <title>name</title>
               <style>
+                html {
+                  margin: 20px;
+                }
+            
+                #header > * {
+                  text-align: right;
+                  margin: 0;
+                }
+            
                 p {
                   margin: 0;
                 }
-
+            
                 .slide {
-                  margin-bottom: 1em;
+                  margin-bottom: 0.5em;
+                }
+            
+                .slide:first-child {
+                  margin-top: 0.5em;
+                }
+            
+                table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin-top: 1em;
+                }
+            
+                td {
+                  vertical-align: top;
+                  border-top: 1px dotted black;
+                }
+            
+                td:last-child {
+                  font-size: x-large;
+                  padding-top: 1em;
+                  text-align: center;
                 }
               </style>
             </head>
             <body>
             
-            <h1>name</h1>
-            <h3>hymnbook, č. 123</h3>
-            <h2>Sloha 1</h2>
-            <div class="slide">
-              <p>line1</p>
-              <p>line2</p>
+            <div id="header">
+              <h2>č. 123</h2>
+              <h3>name</h3>
+              <h4>hymnbook</h4>
             </div>
-            <div class="slide">
-              <p>line3</p>
-              <p>line4</p>
-            </div>
+            <table>
+              <tr>
+                <td>
+                  <div class="slide">
+                    <p>line1</p>
+                    <p>line2</p>
+                  </div>
+                  <div class="slide">
+                    <p>line3</p>
+                    <p>line4</p>
+                  </div>
+                </td>
+                <td>Sloha 1</td>
+              </tr>
+            </table>
 
             </body>
             </html>
