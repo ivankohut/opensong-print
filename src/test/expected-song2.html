@@ -4,47 +4,98 @@
   <meta charset="utf-8">
   <title>Celú noc, celý deň</title>
   <style>
+    html {
+      margin: 20px;
+    }
+
+    #header > * {
+      text-align: right;
+      margin: 0;
+    }
+
     p {
       margin: 0;
     }
 
     .slide {
-      margin-bottom: 1em;
+      margin-bottom: 0.5em;
+    }
+
+    .slide:first-child {
+      margin-top: 0.5em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1em;
+    }
+
+    td {
+      vertical-align: top;
+      border-top: 1px dotted black;
+    }
+
+    td:last-child {
+      font-size: x-large;
+      padding-top: 1em;
+      text-align: center;
     }
   </style>
 </head>
 <body>
 
-<h1>Celú noc, celý deň</h1>
-<h3>Oranžový spevníček, č. 8</h3>
-<h2>Refrén</h2>
-<div class="slide">
-  <p>Celú noc, celý deň,</p>
-  <p>anjeli ma strážia, Pane môj.</p>
-  <p>Celú noc, celý deň,</p>
-  <p>sláva, to ma chráni Pán!</p>
+<div id="header">
+  <h2>č. 8</h2>
+  <h3>Celú noc, celý deň</h3>
+  <h4>Oranžový spevníček</h4>
 </div>
-<h2>Sloha 1</h2>
-<div class="slide">
-  <p>Na západe zomiera deň,</p>
-  <p>anjeli ma strážia, Pane môj.</p>
-  <p>Dieťa moje, spinkaj len,</p>
-  <p>sláva, to ma chráni Pán!</p>
-</div>
-<h2>Sloha 2</h2>
-<div class="slide">
-  <p>Večer, keď si líham spať,</p>
-  <p>anjeli ma strážia, Pane môj.</p>
-  <p>Duša moja modlí sa,</p>
-  <p>sláva, to ma chráni Pán!</p>
-</div>
-<h2>Sloha 3</h2>
-<div class="slide">
-  <p>S ranným svitom zobuď si ma,</p>
-  <p>anjeli ma strážia, Pane môj.</p>
-  <p>Tvoja láska sprevádzaj ma,</p>
-  <p>sláva, to ma chráni Pán!</p>
-</div>
+<table>
+  <tr>
+    <td>
+      <div class="slide">
+        <p>Celú noc, celý deň,</p>
+        <p>anjeli ma strážia, Pane môj.</p>
+        <p>Celú noc, celý deň,</p>
+        <p>sláva, to ma chráni Pán!</p>
+      </div>
+    </td>
+    <td>Refrén</td>
+  </tr>
+  <tr>
+    <td>
+      <div class="slide">
+        <p>Na západe zomiera deň,</p>
+        <p>anjeli ma strážia, Pane môj.</p>
+        <p>Dieťa moje, spinkaj len,</p>
+        <p>sláva, to ma chráni Pán!</p>
+      </div>
+    </td>
+    <td>Sloha 1</td>
+  </tr>
+  <tr>
+    <td>
+      <div class="slide">
+        <p>Večer, keď si líham spať,</p>
+        <p>anjeli ma strážia, Pane môj.</p>
+        <p>Duša moja modlí sa,</p>
+        <p>sláva, to ma chráni Pán!</p>
+      </div>
+    </td>
+    <td>Sloha 2</td>
+  </tr>
+  <tr>
+    <td>
+      <div class="slide">
+        <p>S ranným svitom zobuď si ma,</p>
+        <p>anjeli ma strážia, Pane môj.</p>
+        <p>Tvoja láska sprevádzaj ma,</p>
+        <p>sláva, to ma chráni Pán!</p>
+      </div>
+    </td>
+    <td>Sloha 3</td>
+  </tr>
+</table>
 
 </body>
 </html>
