@@ -130,14 +130,9 @@ interface Song {
 
 class HtmlSong(private val hymnbook: String, private val song: Song) {
     override fun toString(): String {
-        val lyrics = "<table>\n" + song.lyrics.map { section ->
-            "  <tr>\n    <td>\n" + section.slides.map { slide ->
-                "      <div class=\"slide\">\n" + slide.split(Regex("\\n"))
-                    .map { line -> "        <p>${line}</p>\n" }
-                    .joinToString("") + "      </div>\n"
-            }.joinToString("") +
-            "    </td>\n    <td>${section.name}</td>\n  </tr>\n"
-        }.joinToString("") + "</table>"
+        val lyrics = "<table>\n" +
+                song.lyrics.joinToString("") { section -> HtmlSection(section).toString() } +
+                "</table>"
         return """
 <!DOCTYPE html>
 <html lang="sk">
@@ -147,6 +142,25 @@ class HtmlSong(private val hymnbook: String, private val song: Song) {
   <style>
     html {
       margin: 20px;
+    }
+
+    input[type=checkbox]:checked ~ * .accordable p {
+      margin: 3ex 0 0;
+    }
+
+    label[for=show-accords] {
+      position: absolute;
+      left: 50px
+    }
+
+    #show-accords {
+      position: absolute;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
     }
 
     #header > * {
@@ -186,6 +200,8 @@ class HtmlSong(private val hymnbook: String, private val song: Song) {
 </head>
 <body>
 
+<label class="no-print" for="show-accords">Zobraziť priestor pre akordy</label>
+<input id="show-accords" class="no-print" type="checkbox" checked>
 <div id="header">
   <h2>č. ${song.number}</h2>
   <h3>${song.name}</h3>
@@ -196,6 +212,19 @@ ${lyrics}
 </body>
 </html>
 """.trimIndent()
+    }
+}
+
+class HtmlSection(private val section: Section) {
+    override fun toString(): String {
+        val accordable =
+            if (section.name.matches(Regex("Sloha \\d+")) && section.name != "Sloha 1") "" else " class=\"accordable\""
+        return "  <tr>\n    <td$accordable>\n" + section.slides.map { slide ->
+            "      <div class=\"slide\">\n" + slide.split(Regex("\\n"))
+                .map { line -> "        <p>${line}</p>\n" }
+                .joinToString("") + "      </div>\n"
+        }.joinToString("") +
+                "    </td>\n    <td>${section.name}</td>\n  </tr>\n"
     }
 }
 

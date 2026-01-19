@@ -28,6 +28,25 @@ class HtmlSongTest {
                   margin: 20px;
                 }
             
+                input[type=checkbox]:checked ~ * .accordable p {
+                  margin: 3ex 0 0;
+                }
+            
+                label[for=show-accords] {
+                  position: absolute;
+                  left: 50px
+                }
+            
+                #show-accords {
+                  position: absolute;
+                }
+            
+                @media print {
+                  .no-print {
+                    display: none !important;
+                  }
+                }
+
                 #header > * {
                   text-align: right;
                   margin: 0;
@@ -65,6 +84,8 @@ class HtmlSongTest {
             </head>
             <body>
             
+            <label class="no-print" for="show-accords">Zobraziť priestor pre akordy</label>
+            <input id="show-accords" class="no-print" type="checkbox" checked>
             <div id="header">
               <h2>č. 123</h2>
               <h3>name</h3>
@@ -72,7 +93,7 @@ class HtmlSongTest {
             </div>
             <table>
               <tr>
-                <td>
+                <td class="accordable">
                   <div class="slide">
                     <p>line1</p>
                     <p>line2</p>
