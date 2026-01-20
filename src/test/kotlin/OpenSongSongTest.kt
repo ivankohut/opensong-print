@@ -36,17 +36,18 @@ class OpenSongSongTest {
         assertThat(sut.lyrics).satisfiesExactly(
             { verse ->
                 assertSection(
-                    verse, "Sloha 1", "v1 line 1\nv1 line 2", "v1 line 3\nv1 line 4\nv1 line 5\nv1 line 6"
+                    verse, Section.Type.VERSE, 1, "v1 line 1\nv1 line 2", "v1 line 3\nv1 line 4\nv1 line 5\nv1 line 6"
                 )
             },
-            { chorus -> assertSection(chorus, "Refrén 2", "c2 line 1\nc2 line 2", "c2 line 3\nc2 line 4") },
-            { bridge -> assertSection(bridge, "Prechod 3", "b3 line 1") },
-            { prechorus -> assertSection(prechorus, "Predrefrén 4", "p4 line 1") },
-            { tag -> assertSection(tag, "Značka 5", "t5 line 1") })
+            { chorus -> assertSection(chorus, Section.Type.CHORUS, 2, "c2 line 1\nc2 line 2", "c2 line 3\nc2 line 4") },
+            { bridge -> assertSection(bridge, Section.Type.BRIDGE, 3, "b3 line 1") },
+            { prechorus -> assertSection(prechorus, Section.Type.PRECHORUS, 4, "p4 line 1") },
+            { tag -> assertSection(tag, Section.Type.TAG, 5, "t5 line 1") })
     }
 
-    fun assertSection(verse: Section, name: String, vararg slides: String) {
-        assertThat(verse.name).isEqualTo(name)
-        assertThat(verse.slides).containsExactlyElementsOf(slides.toList())
+    fun assertSection(section: Section, type: Section.Type, number: Int?, vararg slides: String) {
+        assertThat(section.type).isEqualTo(type)
+        assertThat(section.number).isEqualTo(number)
+        assertThat(section.slides).containsExactlyElementsOf(slides.toList())
     }
 }

@@ -11,7 +11,8 @@ class HtmlSongTest {
             override val name: String = "name"
             override val number: Int = 123
             override val lyrics: Iterable<Section> = listOf(object : Section {
-                override val name: String = "Sloha 1"
+                override val type: Section.Type = Section.Type.VERSE
+                override val number: Int = 1
                 override val slides: Iterable<String> = listOf("line1\nline2", "line3\nline4")
             })
         })

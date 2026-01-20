@@ -2,6 +2,7 @@ package sk.ivankohut
 
 import org.w3c.dom.Element
 import java.io.File
+import java.lang.Integer.parseInt
 import java.nio.file.Path
 import java.util.Map.entry
 import java.util.function.Function
@@ -95,19 +96,20 @@ class OpenSongSong(elements: Function<String, String>) : Song {
 
     override val name: String = elements.apply("title")
     override val number: Int = elements.apply("hymn_number").toInt()
-    private val sectionNames = mapOf(
-        'C' to "Refrén",
-        'V' to "Sloha",
-        'P' to "Predrefrén",
-        'B' to "Prechod",
-        'T' to "Značka"
+    private val sectionTypes = mapOf(
+        'C' to Section.Type.CHORUS,
+        'V' to Section.Type.VERSE,
+        'P' to Section.Type.PRECHORUS,
+        'B' to Section.Type.BRIDGE,
+        'T' to Section.Type.TAG
     )
     override val lyrics: Iterable<Section> =
         Regex("\\[(\\w+)]((\\n .*)+)").findAll(elements.apply("lyrics")).map { result ->
             object : Section {
                 private val code = result.groupValues[1]
-                override val name: String =
-                    sectionNames.getOrDefault(code[0], "" + code[0]) + (if (code.length > 1) " " + code[1] else "")
+                override val type: Section.Type =
+                    requireNotNull(sectionTypes[code[0]]) { "Unknown section type code: '${code[0]}'" }
+                override val number: Int? = (if (code.length > 1) parseInt(code[1] + "") else null)
                 override val slides: Iterable<String> = result.groupValues[2]
                     .trim()
                     .split("\n").map { it.trim() }.joinToString("\n")
@@ -118,7 +120,12 @@ class OpenSongSong(elements: Function<String, String>) : Song {
 }
 
 interface Section {
-    val name: String
+    enum class Type {
+        VERSE, CHORUS, PRECHORUS, BRIDGE, TAG
+    }
+
+    val type: Type
+    val number: Int?
     val slides: Iterable<String>
 }
 
@@ -215,16 +222,28 @@ ${lyrics}
     }
 }
 
-class HtmlSection(private val section: Section) {
+class HtmlSection(private val section: Section, private val sectionNames: Map<Section.Type, String>) {
+
+    constructor(section: Section) : this(section, mapOf(
+        Section.Type.CHORUS to "Refrén",
+        Section.Type.VERSE to "Sloha",
+        Section.Type.PRECHORUS to "Predrefrén",
+        Section.Type.BRIDGE to "Prechod",
+        Section.Type.TAG to "Značka"
+    ))
+
     override fun toString(): String {
+        val number = section.number
         val accordable =
-            if (section.name.matches(Regex("Sloha \\d+")) && section.name != "Sloha 1") "" else " class=\"accordable\""
+            if (section.type == Section.Type.VERSE && number != null && number > 1) "" else " class=\"accordable\""
+        val name = requireNotNull(sectionNames[section.type]) { "Unsupported section type: '${section.type}'" } +
+                (if (number != null) " $number" else "")
         return "  <tr>\n    <td$accordable>\n" + section.slides.map { slide ->
             "      <div class=\"slide\">\n" + slide.split(Regex("\\n"))
                 .map { line -> "        <p>${line}</p>\n" }
                 .joinToString("") + "      </div>\n"
         }.joinToString("") +
-                "    </td>\n    <td>${section.name}</td>\n  </tr>\n"
+                "    </td>\n    <td>${name}</td>\n  </tr>\n"
     }
 }
 
