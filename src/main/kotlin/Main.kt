@@ -55,6 +55,7 @@ class HtmlHymnbook(private val name: String, private val htmlSongs: Iterable<Hym
     override fun iterator(): Iterator<Map.Entry<String, String>> {
         val listItems = htmlSongs.sortedBy { it.number }
             .joinToString("\n") { "  <li><a href=\"${it.filename}\">${it.number} - ${it.name}</a></li>" }
+        val title = "Spevník „${name}“"
         return htmlSongs
             .map { song -> entry(song.filename, song.content) }
             .plus(
@@ -64,11 +65,11 @@ class HtmlHymnbook(private val name: String, private val htmlSongs: Iterable<Hym
 <html lang="sk">
 <head>
   <meta charset="utf-8">
-  <title>Spevník „${name}“</title>
+  <title>${title}</title>
 </head>
 <body>
 
-<h1>Spevník „${name}“</h1>
+<h1>${title}</h1>
 <ul>
 ${listItems}
 </ul>
