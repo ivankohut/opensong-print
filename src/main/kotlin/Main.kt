@@ -38,8 +38,8 @@ interface HymnbookSong {
 }
 
 class HtmlHymnbookSong(song: Song, filename: String, content: Any) : HymnbookSong {
-    override val name: String = song.name
-    override val number: Int = song.number
+    override val name: String = song.name()
+    override val number: Int = song.number()
     override val filename: String = "$filename.html"
     override val content: String = content.toString()
 }
@@ -48,7 +48,8 @@ class HtmlHymnbook(private val name: String, private val htmlSongs: Iterable<Hym
     Iterable<Map.Entry<String, String>> {
     constructor(openSongSongs: Iterable<Map.Entry<String, String>>, name: String)
             : this(name, openSongSongs.map { entry ->
-        val song = OpenSongSong(OpenSongXmlElementsContents(entry.value))
+        val song =
+            OpenSongSong(OpenSongXmlElementsContents(entry.value), { code, lyrics -> PhysicalSection(code, lyrics) })
         HtmlHymnbookSong(song, entry.key, HtmlSong(name, song))
     })
 
@@ -93,31 +94,62 @@ class OpenSongXmlElementsContents(xml: String) : Function<String, String> {
     override fun apply(element: String): String = root.getElementsByTagName(element).item(0).textContent
 }
 
-class OpenSongSong(elements: Function<String, String>) : Song {
+fun interface SectionMapping {
+    fun map(code: String, lyrics: String): Iterable<Section>
+}
 
-    override val name: String = elements.apply("title")
-    override val number: Int = elements.apply("hymn_number").toInt()
-    private val sectionTypes = mapOf(
-        'C' to Section.Type.CHORUS,
-        'V' to Section.Type.VERSE,
-        'P' to Section.Type.PRECHORUS,
-        'B' to Section.Type.BRIDGE,
-        'T' to Section.Type.TAG
-    )
-    override val lyrics: Iterable<Section> =
-        Regex("\\[(\\w+)]((\\n .*)+)").findAll(elements.apply("lyrics")).map { result ->
-            object : Section {
-                private val code = result.groupValues[1]
-                override val type: Section.Type =
-                    requireNotNull(sectionTypes[code[0]]) { "Unknown section type code: '${code[0]}'" }
-                override val number: Int? = (if (code.length > 1) parseInt(code[1] + "") else null)
-                override val slides: Iterable<String> = result.groupValues[2]
-                    .trim()
-                    .split("\n").map { it.trim() }.joinToString("\n")
-                    .split(Regex("\\|\\|\\n"))
-                    .map { s -> s.replace('|', '\n') }
+class OpenSongSong(
+    private val elements: Function<String, String>,
+    private val sectionMapping: SectionMapping
+) : Song {
+    override fun name(): String = elements.apply("title")
+    override fun number(): Int = elements.apply("hymn_number").toInt()
+    override fun lyrics(): Iterable<Section> =
+        elements.apply("lyrics")
+            .split(Regex("(?m)^(?=\\[(\\w+)])"))
+            .drop(1)
+            .flatMap {
+                val result = Regex("\\[(\\w+)]\\n((.*\\n)*(.*))").matchEntire(it)!!
+                sectionMapping.map(result.groupValues[1], result.groupValues[2].trimEnd())
             }
-        }.toList()
+}
+
+class PhysicalSection(
+    private val sectionCode: String,
+    private val lyrics: String,
+    private val sectionTypes: Map<Char, Section.Type>
+) : Iterable<Section> {
+
+    constructor(sectionCode: String, lyrics: String) : this(
+        sectionCode, lyrics, mapOf(
+            'C' to Section.Type.CHORUS,
+            'V' to Section.Type.VERSE,
+            'P' to Section.Type.PRECHORUS,
+            'B' to Section.Type.BRIDGE,
+            'T' to Section.Type.TAG
+        )
+    )
+
+    override fun iterator(): Iterator<Section> {
+        return lyrics
+            .trimEnd()
+            .split("\n").map { it.trimEnd() }
+            .groupBy { s -> s[0] }
+            .filter { it.key != '.' }
+            .map {
+                object : Section {
+                    private val code = sectionCode + (if (it.key == ' ') "" else it.key)
+                    override val type: Section.Type =
+                        requireNotNull(sectionTypes[code[0]]) { "Unknown section type code: '${code[0]}'" }
+                    override val number: Int? = (if (code.length > 1) parseInt(code[1] + "") else null)
+                    override val slides: Iterable<String> = it.value
+                        .map { it.drop(1).trim().replace("_", "").replace(Regex("  +"), " ") }
+                        .joinToString("\n")
+                        .split(Regex("(?m)\\s*\\|\\|\\s*"))
+                        .map { s -> s.replace(Regex("\\s*\\|\\s*"), "\n") }
+                } as Section
+            }.iterator()
+    }
 }
 
 interface Section {
@@ -131,22 +163,22 @@ interface Section {
 }
 
 interface Song {
-    val name: String
-    val number: Int
-    val lyrics: Iterable<Section>
+    fun name(): String
+    fun number(): Int
+    fun lyrics(): Iterable<Section>
 }
 
 class HtmlSong(private val hymnbook: String, private val song: Song) {
     override fun toString(): String {
         val lyrics = "<table>\n" +
-                song.lyrics.joinToString("") { section -> HtmlSection(section).toString() } +
+                song.lyrics().joinToString("") { section -> HtmlSection(section).toString() } +
                 "</table>"
         return """
 <!DOCTYPE html>
 <html lang="sk">
 <head>
   <meta charset="utf-8">
-  <title>${song.name}</title>
+  <title>${song.name()}</title>
   <style>
     html {
       margin: 20px;
@@ -211,8 +243,8 @@ class HtmlSong(private val hymnbook: String, private val song: Song) {
 <label class="no-print" for="show-accords">Zobraziť priestor pre akordy</label>
 <input id="show-accords" class="no-print" type="checkbox" checked>
 <div id="header">
-  <h2>č. ${song.number}</h2>
-  <h3>${song.name}</h3>
+  <h2>č. ${song.number()}</h2>
+  <h3>${song.name()}</h3>
   <h4>${hymnbook}</h4>
 </div>
 ${lyrics}
@@ -225,13 +257,15 @@ ${lyrics}
 
 class HtmlSection(private val section: Section, private val sectionNames: Map<Section.Type, String>) {
 
-    constructor(section: Section) : this(section, mapOf(
-        Section.Type.CHORUS to "Refrén",
-        Section.Type.VERSE to "Sloha",
-        Section.Type.PRECHORUS to "Predrefrén",
-        Section.Type.BRIDGE to "Prechod",
-        Section.Type.TAG to "Značka"
-    ))
+    constructor(section: Section) : this(
+        section, mapOf(
+            Section.Type.CHORUS to "Refrén",
+            Section.Type.VERSE to "Sloha",
+            Section.Type.PRECHORUS to "Predrefrén",
+            Section.Type.BRIDGE to "Prechod",
+            Section.Type.TAG to "Značka"
+        )
+    )
 
     override fun toString(): String {
         val number = section.number

@@ -11,8 +11,8 @@ class HtmlHymnbookSongTest {
         val song = createSong()
         val sut = HtmlHymnbookSong(song, "filename", "content")
         // exercise & verify
-        assertThat(sut.name).isEqualTo(song.name)
-        assertThat(sut.number).isEqualTo(song.number)
+        assertThat(sut.name).isEqualTo(song.name())
+        assertThat(sut.number).isEqualTo(song.number())
     }
 
     @Test
@@ -36,9 +36,9 @@ class HtmlHymnbookSongTest {
 
     private fun createSong(): Song {
         return object : Song {
-            override val name: String = "name"
-            override val number: Int = 123
-            override val lyrics: Iterable<Section> = emptyList()
+            override fun name(): String = "name"
+            override fun number(): Int = 123
+            override fun lyrics(): Iterable<Section> = emptyList()
         }
     }
 }
