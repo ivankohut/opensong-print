@@ -50,7 +50,7 @@ class HtmlHymnbook(private val name: String, private val htmlSongs: Iterable<Hym
             : this(name, openSongSongs.map { entry ->
         val song =
             OpenSongSong(OpenSongXmlElementsContents(entry.value), { code, lyrics -> PhysicalSection(code, lyrics) })
-        HtmlHymnbookSong(song, entry.key, HtmlSong(name, song))
+        HtmlHymnbookSong(song, entry.key, HtmlSong(name, song, SONG_CSS, SONG_CONFIGURATION_DIV))
     })
 
     override fun iterator(): Iterator<Map.Entry<String, String>> {
@@ -168,7 +168,7 @@ interface Song {
     fun lyrics(): Iterable<Section>
 }
 
-class HtmlSong(private val hymnbook: String, private val song: Song) {
+class HtmlSong(private val hymnbook: String, private val song: Song, private val css: String, private val configurationDiv: String) {
     override fun toString(): String {
         val lyrics = "<table>\n" +
                 song.lyrics().joinToString("") { section -> HtmlSection(section).toString() } +
@@ -180,7 +180,60 @@ class HtmlSong(private val hymnbook: String, private val song: Song) {
   <meta charset="utf-8">
   <title>${song.name()}</title>
   <style>
-    html {
+$css  </style>
+</head>
+<body>
+
+<div id="header">
+$configurationDiv  <div id="song-coordinates">
+    <h2>č. ${song.number()}</h2>
+    <h3>${song.name()}</h3>
+    <h4>${hymnbook}</h4>
+  </div>
+</div>
+${lyrics}
+
+</body>
+</html>
+""".trimIndent()
+    }
+}
+
+class HtmlSection(private val section: Section, private val sectionNames: Map<Section.Type, String>) {
+
+    constructor(section: Section) : this(
+        section, mapOf(
+            Section.Type.CHORUS to "Refrén",
+            Section.Type.VERSE to "Sloha",
+            Section.Type.PRECHORUS to "Predrefrén",
+            Section.Type.BRIDGE to "Prechod",
+            Section.Type.TAG to "Značka"
+        )
+    )
+
+    override fun toString(): String {
+        val number = section.number
+        val accordable =
+            if (section.type == Section.Type.VERSE && number != null && number > 1) "" else " class=\"accordable\""
+        val name = requireNotNull(sectionNames[section.type]) { "Unsupported section type: '${section.type}'" } +
+                (if (number != null) " $number" else "")
+        return "  <tr>\n    <td$accordable>\n" + section.slides.map { slide ->
+            "      <div class=\"slide\">\n" + slide.split(Regex("\\n"))
+                .map { line -> "        <p>${line}</p>\n" }
+                .joinToString("") + "      </div>\n"
+        }.joinToString("") +
+                "    </td>\n    <td>${name}</td>\n  </tr>\n"
+    }
+}
+
+class FolderOfUtf8Files(private val path: Path, private val files: Iterable<Map.Entry<String, String>>) {
+    fun write() {
+        path.createDirectories()
+        files.forEach { entry -> path.resolve(entry.key).writeBytes(entry.value.toByteArray()) }
+    }
+}
+
+const val SONG_CSS = """    html {
       margin: 20px;
       font-family: "Liberation Serif", serif;
       --selected-font-size: 24px;
@@ -245,12 +298,9 @@ class HtmlSong(private val hymnbook: String, private val song: Song) {
       padding-top: 1em;
       text-align: center;
     }
-  </style>
-</head>
-<body>
+"""
 
-<div id="header">
-  <div id="configuration">
+const val SONG_CONFIGURATION_DIV = """  <div id="configuration">
     <div>
       <label class="no-print" for="show-accords">Zobraziť priestor pre akordy</label>
       <input id="show-accords" class="no-print" type="checkbox" checked>
@@ -270,50 +320,4 @@ class HtmlSong(private val hymnbook: String, private val song: Song) {
       </script>
     </div>
   </div>
-  <div id="song-coordinates">
-    <h2>č. ${song.number()}</h2>
-    <h3>${song.name()}</h3>
-    <h4>${hymnbook}</h4>
-  </div>
-</div>
-${lyrics}
-
-</body>
-</html>
-""".trimIndent()
-    }
-}
-
-class HtmlSection(private val section: Section, private val sectionNames: Map<Section.Type, String>) {
-
-    constructor(section: Section) : this(
-        section, mapOf(
-            Section.Type.CHORUS to "Refrén",
-            Section.Type.VERSE to "Sloha",
-            Section.Type.PRECHORUS to "Predrefrén",
-            Section.Type.BRIDGE to "Prechod",
-            Section.Type.TAG to "Značka"
-        )
-    )
-
-    override fun toString(): String {
-        val number = section.number
-        val accordable =
-            if (section.type == Section.Type.VERSE && number != null && number > 1) "" else " class=\"accordable\""
-        val name = requireNotNull(sectionNames[section.type]) { "Unsupported section type: '${section.type}'" } +
-                (if (number != null) " $number" else "")
-        return "  <tr>\n    <td$accordable>\n" + section.slides.map { slide ->
-            "      <div class=\"slide\">\n" + slide.split(Regex("\\n"))
-                .map { line -> "        <p>${line}</p>\n" }
-                .joinToString("") + "      </div>\n"
-        }.joinToString("") +
-                "    </td>\n    <td>${name}</td>\n  </tr>\n"
-    }
-}
-
-class FolderOfUtf8Files(private val path: Path, private val files: Iterable<Map.Entry<String, String>>) {
-    fun write() {
-        path.createDirectories()
-        files.forEach { entry -> path.resolve(entry.key).writeBytes(entry.value.toByteArray()) }
-    }
-}
+"""
