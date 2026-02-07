@@ -72,7 +72,7 @@ class HtmlHymnbook(private val name: String, private val htmlSongs: Iterable<Hym
 
 <h1>${title}</h1>
 <ul>
-${listItems}
+$listItems
 </ul>
 
 </body>
@@ -143,7 +143,7 @@ class PhysicalSection(
                         requireNotNull(sectionTypes[code[0]]) { "Unknown section type code: '${code[0]}'" }
                     override val number: Int? = (if (code.length > 1) parseInt(code[1] + "") else null)
                     override val slides: Iterable<String> = it.value
-                        .map { it.drop(1).trim().replace("_", "").replace(Regex("  +"), " ") }
+                        .map { line -> line.drop(1).trim().replace("_", "").replace(Regex("  +"), " ") }
                         .joinToString("\n")
                         .split(Regex("(?m)\\s*\\|\\|\\s*"))
                         .map { s -> s.replace(Regex("\\s*\\|\\s*"), "\n") }
@@ -168,7 +168,12 @@ interface Song {
     fun lyrics(): Iterable<Section>
 }
 
-class HtmlSong(private val hymnbook: String, private val song: Song, private val css: String, private val configurationDiv: String) {
+class HtmlSong(
+    private val hymnbook: String,
+    private val song: Song,
+    private val css: String,
+    private val configurationDiv: String
+) {
     override fun toString(): String {
         val lyrics = "<table>\n" +
                 song.lyrics().joinToString("") { section -> HtmlSection(section).toString() } +
@@ -191,7 +196,7 @@ $configurationDiv  <div id="song-coordinates">
     <h4>${hymnbook}</h4>
   </div>
 </div>
-${lyrics}
+$lyrics
 
 </body>
 </html>

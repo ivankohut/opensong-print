@@ -30,7 +30,7 @@ class OpenSongSongTest {
                      chorus2
                      chorus3
                 """.trimIndent()
-                ).get(elementName)!!
+                )[elementName]!!
             },
             sectionMapping
         )

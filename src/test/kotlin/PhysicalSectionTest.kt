@@ -69,13 +69,13 @@ class PhysicalSectionTest {
         // exercise & verify
         assertThat(sut).satisfiesExactly(
             { verse ->
-                assertSection(
-                    verse, Section.Type.VERSE, 1, "Hello, Hello\nWorld1\nHello, Hello\nWorld3"
+                assertVerseSection(
+                    verse, 1, "Hello, Hello\nWorld1\nHello, Hello\nWorld3"
                 )
             },
             { verse ->
-                assertSection(
-                    verse, Section.Type.VERSE, 2, "Hi, Hello\nWorld2\nHi, Hello\nWorld4"
+                assertVerseSection(
+                    verse, 2, "Hi, Hello\nWorld2\nHi, Hello\nWorld4"
                 )
             }
         )
@@ -84,8 +84,8 @@ class PhysicalSectionTest {
 
 private fun createSut(lyrics: String): PhysicalSection = PhysicalSection("C", lyrics)
 
-private fun assertSection(section: Section, type: Section.Type, number: Int?, vararg slides: String) {
-    assertThat(section.type).isEqualTo(type)
+private fun assertVerseSection(section: Section, number: Int?, vararg slides: String) {
+    assertThat(section.type).isEqualTo(Section.Type.VERSE)
     assertThat(section.number).isEqualTo(number)
     assertThat(section.slides).containsExactlyElementsOf(slides.toList())
 }

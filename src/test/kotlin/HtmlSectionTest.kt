@@ -53,9 +53,9 @@ class HtmlSectionTest {
         assertThat(actual.trimIndent()).containsPattern(
             """
               <tr>
-                <td class="accordable">
-                </td>
-                <td>(.*)</td>
+               {2}<td class="accordable">
+               {2}</td>
+               {2}<td>(.*)</td>
               </tr>
 """.trimIndent()
         )
@@ -77,14 +77,14 @@ class HtmlSectionTest {
         assertThat(actual.trimIndent()).containsPattern(
             """
               <tr>
-                <td>
-                </td>
-                <td>(.*)</td>
+               {2}<td>
+               {2}</td>
+               {2}<td>(.*)</td>
               </tr>
 """.trimIndent()
         )
     }
 }
 
-class SimpleSection(override val type: Section.Type, override val number: Int?, override val slides: Iterable<String>) :
+class SimpleSection(override val type: Type, override val number: Int?, override val slides: Iterable<String>) :
     Section

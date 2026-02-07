@@ -44,4 +44,4 @@ class SimpleHymnbookSong(
     override val number: Int,
     override val filename: String,
     override val content: String
-) : HymnbookSong {}
+) : HymnbookSong
