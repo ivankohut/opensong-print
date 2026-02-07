@@ -22,6 +22,8 @@ class HtmlHymnbookTest {
                 <head>
                   <meta charset="utf-8">
                   <title>Spevník „name“</title>
+                  <style>
+                  </style>
                 </head>
                 <body>
 

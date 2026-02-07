@@ -61,23 +61,14 @@ class HtmlHymnbook(private val name: String, private val htmlSongs: Iterable<Hym
             .map { song -> entry(song.filename, song.content) }
             .plus(
                 entry(
-                    "index.html", """
-<!DOCTYPE html>
-<html lang="sk">
-<head>
-  <meta charset="utf-8">
-  <title>${title}</title>
-</head>
-<body>
-
+                    "index.html", HtmlDocument(
+                        title, "", """
 <h1>${title}</h1>
 <ul>
 $listItems
 </ul>
-
-</body>
-</html>
 """.trimIndent()
+                    ).toString()
                 )
             )
             .iterator()
@@ -178,17 +169,10 @@ class HtmlSong(
         val lyrics = "<table>\n" +
                 song.lyrics().joinToString("") { section -> HtmlSection(section).toString() } +
                 "</table>"
-        return """
-<!DOCTYPE html>
-<html lang="sk">
-<head>
-  <meta charset="utf-8">
-  <title>${song.name()}</title>
-  <style>
-$css  </style>
-</head>
-<body>
-
+        return HtmlDocument(
+            song.name(),
+            css,
+            """
 <div id="header">
 $configurationDiv  <div id="song-coordinates">
     <h2>č. ${song.number()}</h2>
@@ -197,6 +181,25 @@ $configurationDiv  <div id="song-coordinates">
   </div>
 </div>
 $lyrics
+""".trimIndent()
+        ).toString()
+    }
+}
+
+class HtmlDocument(private val title: String, private val css: String, private val body: String) {
+    override fun toString(): String {
+        return """
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <title>${title}</title>
+  <style>
+$css  </style>
+</head>
+<body>
+
+$body
 
 </body>
 </html>
