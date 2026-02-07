@@ -27,6 +27,7 @@ class HtmlSongTest {
               <style>
                 html {
                   margin: 20px;
+                  font-family: "Liberation Serif", serif;
                 }
             
                 input[type=checkbox]:checked ~ * .accordable p {

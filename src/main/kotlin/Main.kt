@@ -182,6 +182,7 @@ class HtmlSong(private val hymnbook: String, private val song: Song) {
   <style>
     html {
       margin: 20px;
+      font-family: "Liberation Serif", serif;
     }
 
     input[type=checkbox]:checked ~ * .accordable p {
