@@ -50,7 +50,7 @@ class HtmlSongTest {
                     <p>line4</p>
                   </div>
                 </td>
-                <td>Sloha 1</td>
+                <td>Sloha 1 <span class="opensong-section-name">V1</span></td>
               </tr>
             </table>
 

@@ -24,7 +24,7 @@ class HtmlSectionTest {
                     <p>line4</p>
                   </div>
                 </td>
-                <td>verse 1</td>
+                <td>verse 1 <span class="opensong-section-name">V1</span></td>
               </tr>
 """.trimIndent()
         )

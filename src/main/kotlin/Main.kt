@@ -230,7 +230,7 @@ class HtmlSection(private val section: Section, private val sectionNames: Map<Se
                 .map { line -> "        <p>${line}</p>\n" }
                 .joinToString("") + "      </div>\n"
         }.joinToString("") +
-                "    </td>\n    <td>${name}</td>\n  </tr>\n"
+                "    </td>\n    <td>${name} <span class=\"opensong-section-name\">${section.type.name[0]}${section.number ?: ""}</span></td>\n  </tr>\n"
     }
 }
 
@@ -305,6 +305,19 @@ const val SONG_CSS = """    html {
       font-size: larger;
       padding-top: 1em;
       text-align: center;
+    }
+
+    .opensong-section-name::before {
+      content: "\00a0\00a0\00a0\00a0\00a0(";
+    }
+
+    .opensong-section-name::after {
+      content: ")";
+    }
+
+    .opensong-section-name {
+      color: rgba(0, 0, 0, 0.4);
+      font-size: smaller;
     }
 """
 
