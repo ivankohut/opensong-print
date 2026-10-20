@@ -7,8 +7,18 @@
     html {
       margin: 20px;
       font-family: "Liberation Serif", serif;
-      --selected-font-size: 24px;
+      --screen-font-size: 24px;
+      --print-font-size: 24px;
+      --print-min-font-size-px: 10;
+      --print-max-font-size-px: 32;
       --space-for-accords: 3ex;
+    }
+
+    /* The margin and size below must match the constants used by the
+       fit-to-page.js script. */
+    @page {
+      size: A4;
+      margin: 10mm;
     }
 
     @media print {
@@ -46,11 +56,17 @@
 
     .slide {
       margin-bottom: 0.5em;
-      font-size: var(--selected-font-size);
+      font-size: var(--screen-font-size);
     }
 
     .slide:first-child {
       margin-top: 0.5em;
+    }
+
+    @media print {
+      .slide {
+        font-size: var(--print-font-size);
+      }
     }
 
     table {
@@ -97,15 +113,7 @@
         });
       </script>
     </div>
-    <div>
-      <label class="no-print" for="select-font-size">Veľkosť písma</label>
-      <input id="select-font-size" class="no-print" type="number" min="8" max="48" value="24">
-      <script>
-        document.getElementById('select-font-size').addEventListener('change', function () {
-          document.documentElement.style.setProperty('--selected-font-size', this.value + 'px');
-        });
-      </script>
-    </div>
+    <script src="fit-to-page.js"></script>
   </div>
   <div id="song-coordinates">
     <h2>č. 1</h2>

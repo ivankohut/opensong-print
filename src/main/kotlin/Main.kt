@@ -17,9 +17,14 @@ fun main(vararg args: String) {
             DirFiles(Path.of(args[1]))
                 .filter { it.value.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<song>") },
             args[0]
-        )
+        ) + entry(FIT_TO_PAGE_JS, loadResource(FIT_TO_PAGE_JS))
     ).write()
 }
+
+const val FIT_TO_PAGE_JS = "fit-to-page.js"
+
+fun loadResource(name: String): String =
+    requireNotNull(object {}.javaClass.getResourceAsStream("/$name")).bufferedReader(Charsets.UTF_8).readText()
 
 class DirFiles(private val path: Path) : Iterable<Map.Entry<String, String>> {
     override fun iterator(): Iterator<Map.Entry<String, String>> {
@@ -244,8 +249,18 @@ class FolderOfUtf8Files(private val path: Path, private val files: Iterable<Map.
 const val SONG_CSS = """    html {
       margin: 20px;
       font-family: "Liberation Serif", serif;
-      --selected-font-size: 24px;
+      --screen-font-size: 24px;
+      --print-font-size: 24px;
+      --print-min-font-size-px: 10;
+      --print-max-font-size-px: 32;
       --space-for-accords: 3ex;
+    }
+
+    /* The margin and size below must match the constants used by the
+       fit-to-page.js script. */
+    @page {
+      size: A4;
+      margin: 10mm;
     }
 
     @media print {
@@ -283,11 +298,17 @@ const val SONG_CSS = """    html {
 
     .slide {
       margin-bottom: 0.5em;
-      font-size: var(--selected-font-size);
+      font-size: var(--screen-font-size);
     }
 
     .slide:first-child {
       margin-top: 0.5em;
+    }
+
+    @media print {
+      .slide {
+        font-size: var(--print-font-size);
+      }
     }
 
     table {
@@ -331,14 +352,6 @@ const val SONG_CONFIGURATION_DIV = """  <div id="configuration">
         });
       </script>
     </div>
-    <div>
-      <label class="no-print" for="select-font-size">Veľkosť písma</label>
-      <input id="select-font-size" class="no-print" type="number" min="8" max="48" value="24">
-      <script>
-        document.getElementById('select-font-size').addEventListener('change', function () {
-          document.documentElement.style.setProperty('--selected-font-size', this.value + 'px');
-        });
-      </script>
-    </div>
+    <script src="$FIT_TO_PAGE_JS"></script>
   </div>
 """

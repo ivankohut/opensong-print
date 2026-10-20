@@ -11,3 +11,4 @@ java -jar ../../build/libs/opensong-to-print.jar "Oranžový spevníček" "$HYMN
 cmp expected-song1.html "$HYMNBOOK_DIR/html/song1.html"
 cmp expected-song2.html "$HYMNBOOK_DIR/html/song2.html"
 cmp expected-index.html "$HYMNBOOK_DIR/html/index.html"
+cmp ../../src/main/resources/fit-to-page.js "$HYMNBOOK_DIR/html/fit-to-page.js"
