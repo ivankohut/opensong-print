@@ -1,6 +1,7 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '2.4.21'
     id 'com.gradleup.shadow' version '9.6.1'
+    id 'com.github.node-gradle.node' version '7.1.0'
 }
 
 group = 'sk.ivankohut'
@@ -23,6 +24,28 @@ kotlin {
 
 test {
     useJUnitPlatform()
+}
+
+// Unit tests for src/main/resources/fit-to-page.js, run with Node's built-in
+// test runner (see src/test/js). The com.github.node-gradle.node plugin
+// downloads the pinned Node distribution automatically.
+node {
+    download = true
+    version = '24.22.0'
+}
+
+tasks.register('nodeTest', com.github.gradle.node.task.NodeTask) {
+    description = 'Runs the JavaScript unit tests with Node.js.'
+    group = 'verification'
+    workingDir = projectDir
+    script = file('src/test/js/fit-to-page.test.mjs')
+    args = ['--test']
+    inputs.files(fileTree('src/test/js'), 'src/main/resources/fit-to-page.js')
+    outputs.upToDateWhen { false }
+}
+
+tasks.named('check') {
+    dependsOn 'nodeTest'
 }
 
 shadowJar {

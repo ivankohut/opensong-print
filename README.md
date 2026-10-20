@@ -49,10 +49,23 @@ my-songs/
 └── html/
     ├── index.html # hymnbook index: song number – title, sorted by number
     ├── song1.html
-    └── song2.html
+    ├── song2.html
+    └── fit-to-page.js # script that fits the print font size to one page
 ```
 
 Open `html/index.html` in a browser, adjust the font size or the chord space if needed, and print.
+
+## Printing
+
+- The font size used for printing is fitted automatically: when the print dialog opens
+  (`beforeprint`), the page binary-searches for the largest font size (within the input's 8–48 px
+  bounds) at which the song still fits onto a single A4 page, based on the current chord space
+  setting. Very long songs simply stay at the minimum size.
+- The fitting only affects printing — the "Veľkosť písma" control and the on-screen view are left
+  as the user chose them.
+- Page geometry is pinned in the CSS (`@page { size: A4; margin: 10mm; }`) so the printable height is
+  known. Keep the browser's own margins at default and headers/footers disabled, otherwise the
+  browser may shrink the printable area further than the page assumes.
 
 ## Song features
 
@@ -73,6 +86,10 @@ Unit tests:
 ./gradlew test
 ```
 
+The `fit-to-page.js` script is covered by Node.js unit tests (using Node's built-in test runner,
+so no extra packages are needed). They run as part of `./gradlew check`; the required Node
+distribution is downloaded automatically by the build.
+
 End-to-end test (builds the jar, converts the sample songs in `src/test`, and compares the output
 with the expected HTML files):
 
@@ -85,6 +102,9 @@ cd src/test
 
 - `src/main/kotlin/Main.kt` — the whole application: OpenSong XML parsing, section/slide model,
   and HTML generation.
+- `src/main/resources/fit-to-page.js` — print-time font size fitting script, bundled into the jar
+  and written next to the generated song pages.
 - `src/test/kotlin/` — unit tests.
+- `src/test/js/` — Node.js unit tests for `fit-to-page.js`.
 - `src/test/*.xml`, `src/test/expected-*.html`, `src/test/e2e-test.sh` — e2e test fixtures.
 - `print-folder.sh` — convenience wrapper around `java -jar`.
