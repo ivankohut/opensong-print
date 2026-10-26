@@ -18,10 +18,12 @@ fun main(vararg args: String) {
                 .filter { it.value.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<song>") },
             args[0]
         ) + entry(FIT_TO_PAGE_JS, loadResource(FIT_TO_PAGE_JS))
+                + entry(SONG_CSS_FILE, loadResource(SONG_CSS_FILE))
     ).write()
 }
 
 const val FIT_TO_PAGE_JS = "fit-to-page.js"
+const val SONG_CSS_FILE = "song.css"
 
 fun loadResource(name: String): String =
     requireNotNull(object {}.javaClass.getResourceAsStream("/$name")).bufferedReader(Charsets.UTF_8).readText()
@@ -55,7 +57,7 @@ class HtmlHymnbook(private val name: String, private val htmlSongs: Iterable<Hym
             : this(name, openSongSongs.map { entry ->
         val song =
             OpenSongSong(OpenSongXmlElementsContents(entry.value), { code, lyrics -> PhysicalSection(code, lyrics) })
-        HtmlHymnbookSong(song, entry.key, HtmlSong(name, song, SONG_CSS, SONG_CONFIGURATION_DIV))
+        HtmlHymnbookSong(song, entry.key, HtmlSong(name, song, SONG_CONFIGURATION_DIV))
     })
 
     override fun iterator(): Iterator<Map.Entry<String, String>> {
@@ -67,7 +69,7 @@ class HtmlHymnbook(private val name: String, private val htmlSongs: Iterable<Hym
             .plus(
                 entry(
                     "index.html", HtmlDocument(
-                        title, "", """
+                        title, """
 <h1>${title}</h1>
 <ul>
 $listItems
@@ -167,7 +169,6 @@ interface Song {
 class HtmlSong(
     private val hymnbook: String,
     private val song: Song,
-    private val css: String,
     private val configurationDiv: String
 ) {
     override fun toString(): String {
@@ -176,7 +177,6 @@ class HtmlSong(
                 "</table>"
         return HtmlDocument(
             song.name(),
-            css,
             """
 <div id="header">
 $configurationDiv  <div id="song-coordinates">
@@ -191,7 +191,7 @@ $lyrics
     }
 }
 
-class HtmlDocument(private val title: String, private val css: String, private val body: String) {
+class HtmlDocument(private val title: String, private val body: String) {
     override fun toString(): String {
         return """
 <!DOCTYPE html>
@@ -199,8 +199,7 @@ class HtmlDocument(private val title: String, private val css: String, private v
 <head>
   <meta charset="utf-8">
   <title>${title}</title>
-  <style>
-$css  </style>
+  <link rel="stylesheet" href="$SONG_CSS_FILE">
 </head>
 <body>
 
@@ -245,102 +244,6 @@ class FolderOfUtf8Files(private val path: Path, private val files: Iterable<Map.
         files.forEach { entry -> path.resolve(entry.key).writeBytes(entry.value.toByteArray()) }
     }
 }
-
-const val SONG_CSS = """    html {
-      margin: 20px;
-      font-family: "Liberation Serif", serif;
-      --screen-font-size: 24px;
-      --print-font-size: 24px;
-      --print-min-font-size-px: 10;
-      --print-max-font-size-px: 32;
-      --space-for-accords: 3ex;
-    }
-
-    /* The margin and size below must match the constants used by the
-       fit-to-page.js script. */
-    @page {
-      size: A4;
-      margin: 10mm;
-    }
-
-    @media print {
-      .no-print {
-        display: none !important;
-      }
-    }
-
-    #header {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-    }
-
-    #configuration {
-      vertical-align: top;
-    }
-
-    #song-coordinates {
-      text-align: right;
-    }
-
-    #song-coordinates > * {
-      text-align: right;
-      margin: 0;
-    }
-
-    p {
-      margin: 0;
-    }
-
-    .accordable p {
-      margin: var(--space-for-accords) 0 0;
-    }
-
-    .slide {
-      margin-bottom: 0.5em;
-      font-size: var(--screen-font-size);
-    }
-
-    .slide:first-child {
-      margin-top: 0.5em;
-    }
-
-    @media print {
-      .slide {
-        font-size: var(--print-font-size);
-      }
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1em;
-    }
-
-    td {
-      vertical-align: top;
-      border-top: 1px dotted black;
-    }
-
-    td:last-child {
-      font-size: larger;
-      padding-top: 1em;
-      text-align: center;
-    }
-
-    .opensong-section-name::before {
-      content: "\00a0\00a0\00a0\00a0\00a0(";
-    }
-
-    .opensong-section-name::after {
-      content: ")";
-    }
-
-    .opensong-section-name {
-      color: rgba(0, 0, 0, 0.4);
-      font-size: smaller;
-    }
-"""
 
 const val SONG_CONFIGURATION_DIV = """  <div id="configuration">
     <div>

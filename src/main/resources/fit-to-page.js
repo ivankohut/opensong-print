@@ -5,7 +5,7 @@
 // which is the only part that reads or writes the DOM. In Node (unit tests)
 // there is no `window`, so the pure API is published on globalThis instead.
 (() => {
-  // Geometry constants - must match the CSS in SONG_CSS (Main.kt)
+  // Geometry constants - must match the CSS in song.css
   const PX_PER_MM = 96 / 25.4;
   const A4 = Object.freeze({ widthMm: 210, heightMm: 297 });
   const PAGE_MARGIN_MM = 10;

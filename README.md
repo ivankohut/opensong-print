@@ -50,6 +50,7 @@ my-songs/
     ├── index.html # hymnbook index: song number – title, sorted by number
     ├── song1.html
     ├── song2.html
+    ├── song.css   # shared stylesheet linked by the generated pages
     └── fit-to-page.js # script that fits the print font size to one page
 ```
 
@@ -102,6 +103,8 @@ cd src/test
 
 - `src/main/kotlin/Main.kt` — the whole application: OpenSong XML parsing, section/slide model,
   and HTML generation.
+- `src/main/resources/song.css` — shared stylesheet for the generated pages, bundled into the jar
+  and written next to them.
 - `src/main/resources/fit-to-page.js` — print-time font size fitting script, bundled into the jar
   and written next to the generated song pages.
 - `src/test/kotlin/` — unit tests.
