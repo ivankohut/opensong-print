@@ -15,7 +15,7 @@ class HtmlSongTest {
                 override val number: Int = 1
                 override val slides: Iterable<String> = listOf("line1\nline2", "line3\nline4")
             })
-        }, "css\n", "configurationDiv\n")
+        }, "configurationDiv\n")
         // verify
         assertThat(sut.toString()).isEqualTo(
             """
@@ -24,9 +24,7 @@ class HtmlSongTest {
             <head>
               <meta charset="utf-8">
               <title>name</title>
-              <style>
-            css
-              </style>
+              <link rel="stylesheet" href="song.css">
             </head>
             <body>
             
