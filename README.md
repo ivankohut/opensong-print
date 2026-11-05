@@ -1,4 +1,4 @@
-# opensong-to-print
+# opensong-print
 
 A small command-line tool that converts a folder of [OpenSong](https://www.opensong.org/) XML song files
 into printable HTML pages, one per song, plus an index listing the whole hymnbook.
@@ -18,7 +18,7 @@ before printing. The page headings and labels are in Slovak ("Spevník", "Refré
 ./gradlew shadowJar
 ```
 
-This produces a self-contained executable jar at `build/libs/opensong-to-print.jar`.
+This produces a self-contained executable jar at `build/libs/opensong-print.jar`.
 
 ## Usage
 
@@ -29,13 +29,13 @@ This produces a self-contained executable jar at `build/libs/opensong-to-print.j
 or directly:
 
 ```bash
-java -jar build/libs/opensong-to-print.jar "<hymnbook name>" <folder with OpenSong songs>
+java -jar build/libs/opensong-print.jar "<hymnbook name>" <folder with OpenSong songs>
 ```
 
 For example:
 
 ```bash
-java -jar build/libs/opensong-to-print.jar "Oranžový spevníček" ./my-songs
+java -jar build/libs/opensong-print.jar "Oranžový spevníček" ./my-songs
 ```
 
 The tool scans the given folder for files in the OpenSong format (files whose content starts with
