@@ -49,8 +49,8 @@ tasks.named('check') {
 }
 
 shadowJar {
-//    archiveBaseName.set('myapp')  // Or use project.name
-    archiveClassifier.set('')     // Omit classifier for clean name
+    archiveBaseName.set('opensong-print') // Stable name for release assets
+    archiveClassifier.set('')             // Omit classifier for clean name
     archiveVersion.set('')
     manifest {
         attributes 'Main-Class': 'sk.ivankohut.MainKt'
