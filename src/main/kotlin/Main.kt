@@ -51,13 +51,23 @@ class HtmlHymnbookSong(song: Song, filename: String, content: Any) : HymnbookSon
     override val content: String = content.toString()
 }
 
-class HtmlHymnbook(private val name: String, private val htmlSongs: Iterable<HymnbookSong>) :
+class HtmlHymnbook(
+    private val name: String,
+    private val htmlSongs: Iterable<HymnbookSong>,
+    private val allSongsHtml: Any
+) :
     Iterable<Map.Entry<String, String>> {
+    constructor(name: String, openSongSongs: Iterable<Map.Entry<String, OpenSongSong>>) :
+            this(name, openSongSongs.map { entry ->
+                HtmlHymnbookSong(entry.value, entry.key, HtmlSong(name, entry.value, SONG_CONFIGURATION_DIV))
+            }, HtmlAllSongs(name, openSongSongs.map { entry -> entry.value }))
+
     constructor(openSongSongs: Iterable<Map.Entry<String, String>>, name: String)
             : this(name, openSongSongs.map { entry ->
-        val song =
+        entry(
+            entry.key,
             OpenSongSong(OpenSongXmlElementsContents(entry.value), { code, lyrics -> PhysicalSection(code, lyrics) })
-        HtmlHymnbookSong(song, entry.key, HtmlSong(name, song, SONG_CONFIGURATION_DIV))
+        )
     })
 
     override fun iterator(): Iterator<Map.Entry<String, String>> {
@@ -66,11 +76,13 @@ class HtmlHymnbook(private val name: String, private val htmlSongs: Iterable<Hym
         val title = "Spevník „${name}“"
         return htmlSongs
             .map { song -> entry(song.filename, song.content) }
+            .plus(entry("all.html", allSongsHtml.toString()))
             .plus(
                 entry(
                     "index.html", HtmlDocument(
                         title, """
 <h1>${title}</h1>
+<p><a href="all.html">Všetky piesne</a></p>
 <ul>
 $listItems
 </ul>
@@ -79,6 +91,43 @@ $listItems
                 )
             )
             .iterator()
+    }
+}
+
+class HtmlAllSongs(private val name: String, private val songs: Iterable<Song>) {
+    override fun toString(): String {
+        val title = "Spevník „${name}“"
+        val body = "<h1>${title}</h1>\n" + songs.sortedBy { it.number() }.joinToString("") { song ->
+            """
+<h2>č. ${song.number()} - ${song.name()}</h2>
+${song.lyrics().joinToString("") { section -> HtmlSectionAll(section).toString() }}
+""".trimIndent()
+        }
+        return HtmlDocument(title, body).toString()
+    }
+}
+
+class HtmlSectionAll(private val section: Section, private val sectionNames: Map<Section.Type, String>) {
+
+    constructor(section: Section) : this(
+        section, mapOf(
+            Section.Type.CHORUS to "Refrén",
+            Section.Type.VERSE to "Sloha",
+            Section.Type.PRECHORUS to "Predrefrén",
+            Section.Type.BRIDGE to "Prechod",
+            Section.Type.TAG to "Značka"
+        )
+    )
+
+    override fun toString(): String {
+        val number = section.number
+        val name = requireNotNull(sectionNames[section.type]) { "Unsupported section type: '${section.type}'" } +
+                (if (number != null) " $number" else "")
+        return "<h4>${name}</h4>\n" + section.slides.map { slide ->
+            slide.split(Regex("\\n"))
+                .map { line -> "<p>${line}</p>\n" }
+                .joinToString("")
+        }.joinToString("")
     }
 }
 

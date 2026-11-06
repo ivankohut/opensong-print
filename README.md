@@ -51,10 +51,12 @@ my-songs/
     ├── song1.html
     ├── song2.html
     ├── song.css   # shared stylesheet linked by the generated pages
-    └── fit-to-page.js # script that fits the print font size to one page
+    ├── fit-to-page.js # script that fits the print font size to one page
+    └── all.html   # all songs together - useful for full-text search using browser's "Find" feature
 ```
 
 Open `html/index.html` in a browser, enable chord space if needed, and print.
+The index also links to `all.html`, which contains all songs on one page for full-text search.
 
 ## Printing
 

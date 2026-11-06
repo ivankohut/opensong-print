@@ -10,11 +10,12 @@ class HtmlHymnbookTest {
     fun `contains given songs and index page`() {
         val song1 = SimpleHymnbookSong("First Song", 1, "file1.html", "content1")
         val song2 = SimpleHymnbookSong("Second Song", 2, "file2.html", "content2")
-        val sut = HtmlHymnbook("name", listOf(song2, song1))
+        val sut = HtmlHymnbook("name", listOf(song2, song1), "all-html")
         // exercise & verify
         assertThat(sut).containsExactlyInAnyOrder(
             entry(song1.filename, song1.content),
             entry(song2.filename, song2.content),
+            entry("all.html", "all-html"),
             entry(
                 "index.html", """
                 <!DOCTYPE html>
@@ -27,6 +28,7 @@ class HtmlHymnbookTest {
                 <body>
 
                 <h1>Spevník „name“</h1>
+                <p><a href="all.html">Všetky piesne</a></p>
                 <ul>
                   <li><a href="file1.html">1 - First Song</a></li>
                   <li><a href="file2.html">2 - Second Song</a></li>
